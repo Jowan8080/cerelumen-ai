@@ -1,10 +1,13 @@
 import os
-import requests
 from flask import Flask, request, jsonify
+import google.generativeai as genai
 
 app = Flask(__name__)
 
+# جلب المفتاح وتكوينه مباشرة عبر مكتبة جوجل الرسمية
 API_KEY = os.environ.get("GEMINI_API_KEY")
+if API_KEY:
+    genai.configure(api_key=API_KEY)
 
 @app.route('/')
 def home():
@@ -25,22 +28,12 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        # استخدام موديل gemini-pro الثابت والمعتمد عالمياً عبر الـ API
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={API_KEY}"
-        headers = {'Content-Type': 'application/json'}
-        payload = {
-            "contents": [{
-                "parts": [{"text": f"Analyze the following clinical data and provide recommendations: {data}"}]
-            }]
-        }
-
-        response = requests.post(url, json=payload, headers=headers)
-        res_json = response.json()
-
-        if "candidates" in res_json:
-            recommendation_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-        else:
-            recommendation_text = str(res_json)
+        # استخدام الموديل بالطريقة الرسمية الصحيحة للمكتبة
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt = f"Analyze the following clinical data and provide recommendations: {data}"
+        
+        response = model.generate_content(prompt)
+        recommendation_text = response.text
 
         return jsonify({
             "status": "success",
@@ -50,7 +43,7 @@ def analyze_patient():
     except Exception as e:
         return jsonify({
             "status": "success",
-            "recommendation": f"خطأ: {str(e)}"
+            "recommendation": f"خطأ التقاط: {str(e)}"
         }), 200
 
 if __name__ == '__main__':
