@@ -25,8 +25,8 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        # الاتصال المباشر والمضمون عبر الـ API بدون مكتبة جوجل المعقدة
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        # تم إزالة v1beta واستخدام المسار القياسي المباشر
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
         headers = {'Content-Type': 'application/json'}
         payload = {
             "contents": [{
@@ -37,7 +37,6 @@ def analyze_patient():
         response = requests.post(url, json=payload, headers=headers)
         res_json = response.json()
 
-        # استخراج النص بذكاء من استجابة الـ API
         if "candidates" in res_json:
             recommendation_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
         else:
