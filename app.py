@@ -15,31 +15,28 @@ def analyze_patient():
     try:
         raw_data = ""
         
-        # 1. محاولة قراءة البيانات كنص خام
+        # قراءة البيانات بكل الطرق الممكنة لضمان وصولها من التطبيق
         if request.data:
             try:
                 raw_data = request.data.decode('utf-8')
             except:
                 pass
                 
-        # 2. إذا كانت فارغة، محاولة قراءتها من النموذج (Form Data)
         if not raw_data or raw_data.strip() == "":
             if request.form:
                 raw_data = " ".join([f"{k}: {v}" for k, v in request.form.items()])
                 
-        # 3. إذا كانت فارغة تماماً، نقرأ أي بيانات متوفرة
         if not raw_data or raw_data.strip() == "":
             raw_data = request.get_data(as_text=True)
 
         print("Received raw_data:", raw_data)
 
-        # إذا ولسبب ما ظلت فارغة، نرسل نص افتراضي لتجنب توقف التطبيق وللتأكد من عمل الذكاء الاصطناعي
         if not raw_data or raw_data.strip() == "":
             raw_data = "General clinical review request."
 
-        # استدعاء نموذج جيميني للتحليل
+        # استدعاء نموذج جيميني بالنسخة المعتمدة والمستقرة
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=f"Analyze the following clinical data and provide recommendations: {raw_data}"
         )
         
