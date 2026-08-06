@@ -1,10 +1,9 @@
-import os
+ import os
 from flask import Flask, request, jsonify
 import google.generativeai as genai
 
 app = Flask(__name__)
 
-# إعداد المفتاح بأمان
 api_key = os.environ.get("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
@@ -16,7 +15,6 @@ def home():
 @app.route('/api/analyze', methods=['POST'])
 def analyze_patient():
     try:
-        # استخراج البيانات بأي طريقة ترسلها التطبيق
         data = ""
         if request.is_json:
             req_json = request.get_json()
@@ -29,8 +27,8 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        # استخدام نموذج gemini-pro المستقر والمضمون
-        model = genai.GenerativeModel('gemini-pro')
+        # استخدام الموديل المعتمد والمستقر 1.5-flash
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {data}")
         
         return jsonify({
@@ -39,10 +37,9 @@ def analyze_patient():
         })
         
     except Exception as e:
-        # إرجاع الخطأ مباشرة إلى شاشة الجوال لنعرف المشكلة بالتحديد
         return jsonify({
             "status": "success",
-            "recommendation": f"خطأ برمجي أو من المفتاح: {str(e)}"
+            "recommendation": f"خطأ: {str(e)}"
         }), 200
 
 if __name__ == '__main__':
