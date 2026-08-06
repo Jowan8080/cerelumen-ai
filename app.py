@@ -27,8 +27,7 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        # استخدام الموديل القياسي والمباشر بدون أي دوال بحث قديمة
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {data}")
         
         return jsonify({
