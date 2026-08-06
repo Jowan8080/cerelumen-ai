@@ -25,8 +25,8 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        # تم إزالة v1beta واستخدام المسار القياسي المباشر
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        # استخدام اسم الموديل المحدث والمستقر بالكامل
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
         headers = {'Content-Type': 'application/json'}
         payload = {
             "contents": [{
