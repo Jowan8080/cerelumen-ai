@@ -4,9 +4,8 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 
-# إعداد مفتاح الذكاء الاصطناعي والموديل المستقر
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 @app.route('/')
 def home():
@@ -33,7 +32,6 @@ def analyze_patient():
         if not raw_data or raw_data.strip() == "":
             raw_data = "General clinical review request."
 
-        # توليد الرد والتوصيات
         response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {raw_data}")
         
         return jsonify({
