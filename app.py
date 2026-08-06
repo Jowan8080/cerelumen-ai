@@ -4,8 +4,10 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-pro')
+# إعداد المفتاح بأمان
+api_key = os.environ.get("GEMINI_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
 
 @app.route('/')
 def home():
@@ -14,25 +16,22 @@ def home():
 @app.route('/api/analyze', methods=['POST'])
 def analyze_patient():
     try:
-        raw_data = ""
-        
-        if request.data:
-            try:
-                raw_data = request.data.decode('utf-8')
-            except:
-                pass
-                
-        if not raw_data or raw_data.strip() == "":
-            if request.form:
-                raw_data = " ".join([f"{k}: {v}" for k, v in request.form.items()])
-                
-        if not raw_data or raw_data.strip() == "":
-            raw_data = request.get_data(as_text=True)
+        # استخراج البيانات بأي طريقة ترسلها التطبيق
+        data = ""
+        if request.is_json:
+            req_json = request.get_json()
+            data = str(req_json)
+        elif request.form:
+            data = " ".join([f"{k}: {v}" for k, v in request.form.items()])
+        else:
+            data = request.data.decode('utf-8', errors='ignore')
+            
+        if not data or data.strip() == "":
+            data = "General clinical review request."
 
-        if not raw_data or raw_data.strip() == "":
-            raw_data = "General clinical review request."
-
-        response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {raw_data}")
+        # استخدام نموذج gemini-pro المستقر والمضمون
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {data}")
         
         return jsonify({
             "status": "success",
@@ -40,8 +39,11 @@ def analyze_patient():
         })
         
     except Exception as e:
-        print("Error occurred:", str(e))
-        return jsonify({"error": str(e)}), 500
+        # إرجاع الخطأ مباشرة إلى شاشة الجوال لنعرف المشكلة بالتحديد
+        return jsonify({
+            "status": "success",
+            "recommendation": f"خطأ برمجي أو من المفتاح: {str(e)}"
+        }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
