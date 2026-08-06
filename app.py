@@ -8,15 +8,6 @@ api_key = os.environ.get("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
 
-def get_working_model():
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                return genai.GenerativeModel(m.name)
-    except Exception:
-        pass
-    return genai.GenerativeModel('gemini-pro')
-
 @app.route('/')
 def home():
     return "Cerelumen AI Backend is running successfully!"
@@ -36,7 +27,8 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        model = get_working_model()
+        # استخدام الموديل القياسي والمباشر بدون أي دوال بحث قديمة
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {data}")
         
         return jsonify({
