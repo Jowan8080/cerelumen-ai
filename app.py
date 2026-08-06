@@ -1,12 +1,10 @@
 import os
+import requests
 from flask import Flask, request, jsonify
-import google.generativeai as genai
 
 app = Flask(__name__)
 
-api_key = os.environ.get("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 @app.route('/')
 def home():
@@ -27,12 +25,27 @@ def analyze_patient():
         if not data or data.strip() == "":
             data = "General clinical review request."
 
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {data}")
-        
+        # الاتصال المباشر والمضمون عبر الـ API بدون مكتبة جوجل المعقدة
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "contents": [{
+                "parts": [{"text": f"Analyze the following clinical data and provide recommendations: {data}"}]
+            }]
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+        res_json = response.json()
+
+        # استخراج النص بذكاء من استجابة الـ API
+        if "candidates" in res_json:
+            recommendation_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            recommendation_text = str(res_json)
+
         return jsonify({
             "status": "success",
-            "recommendation": response.text
+            "recommendation": recommendation_text
         })
         
     except Exception as e:
