@@ -1,10 +1,12 @@
 import os
 from flask import Flask, request, jsonify
-from google import genai
+import google.generativeai as genai
 
 app = Flask(__name__)
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+# إعداد مفتاح الذكاء الاصطناعي والموديل المستقر
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/')
 def home():
@@ -31,10 +33,8 @@ def analyze_patient():
         if not raw_data or raw_data.strip() == "":
             raw_data = "General clinical review request."
 
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=f"Analyze the following clinical data and provide recommendations: {raw_data}"
-        )
+        # توليد الرد والتوصيات
+        response = model.generate_content(f"Analyze the following clinical data and provide recommendations: {raw_data}")
         
         return jsonify({
             "status": "success",
