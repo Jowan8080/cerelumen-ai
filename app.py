@@ -5,6 +5,7 @@ from google import genai
 from google.genai import types
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 
 # ---------------- Logging ----------------
 logging.basicConfig(
@@ -20,7 +21,6 @@ client = genai.Client(api_key=api_key) if api_key else genai.Client()
 MODEL_NAME = "gemini-3.6-flash"
 
 # ---------------- System Instruction ----------------
-# يوجّه الموديل ليتعامل مع طبيب مختص (دعم قرار سريري) وليس مريض مباشر
 SYSTEM_INSTRUCTION = """
 أنت مساعد سريري (Clinical Decision Support) موجّه لأطباء المخ والأعصاب،
 تساعدهم في اقتراح خطط غذائية ومكملات غذائية داعمة لمرضى في مراحل مبكرة
@@ -67,7 +67,6 @@ def analyze_patient():
             data = "General clinical review request."
 
         logger.info(f"Incoming analyze request | data_len={len(data)}")
-        logger.info(f"MODEL_NAME repr = {repr(MODEL_NAME)}")
 
         prompt = (
             f"بيانات الحالة السريرية المقدَّمة من الطبيب:\n{data}\n\n"
